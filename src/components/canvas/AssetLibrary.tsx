@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AssetLibraryProps {
   onSelectAsset: (src: string, type: "background" | "overlay" | "cosmetic") => void;
@@ -8,43 +8,104 @@ interface AssetLibraryProps {
 
 type AssetCategory = "background" | "overlay" | "cosmetics";
 
+interface AssetItem {
+  name: string;
+  path: string;
+}
+
 export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
   const [activeCategory, setActiveCategory] = useState<AssetCategory>("background");
+  const [assets, setAssets] = useState<Record<AssetCategory, AssetItem[]>>({
+    background: [],
+    overlay: [],
+    cosmetics: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      setLoading(true);
+      try {
+        const backgrounds = [
+          { name: "Golden Gate Bridge", path: "/assets/background/golden_gate_bridge_1.jpg" }
+        ];
+        
+        setAssets({
+          background: backgrounds,
+          overlay: [],
+          cosmetics: []
+        });
+      } catch (error) {
+        console.error("Error loading assets:", error);
+      }
+      setLoading(false);
+    };
+
+    loadAssets();
+  }, []);
 
   const categories = [
-    { id: "background" as AssetCategory, label: "Backgrounds", icon: "🖼️" },
-    { id: "overlay" as AssetCategory, label: "Overlays", icon: "🎨" },
-    { id: "cosmetics" as AssetCategory, label: "Cosmetics", icon: "✨" },
+    { id: "background" as AssetCategory, label: "Backgrounds" },
+    { id: "overlay" as AssetCategory, label: "Overlays" },
+    { id: "cosmetics" as AssetCategory, label: "Cosmetics" }
   ];
 
+  const currentAssets = assets[activeCategory];
+  const assetType = activeCategory === "background" ? "background" : activeCategory === "overlay" ? "overlay" : "cosmetic";
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Asset Library</h3>
-        <div className="flex gap-2">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Asset Library</h3>
+        
+        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide"> 
           {categories.map((category) => (
             <button
               key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              onClick={() => setActiveCategory(category.id as AssetCategory)}
+              className={`flex-none px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                 activeCategory === category.id
                   ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300"
                   : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
               }`}
             >
-              <span className="mr-1">{category.icon}</span>
               {category.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="text-center py-12 text-gray-400 dark:text-gray-500">
-          <div className="text-4xl mb-3">📁</div>
-          <p className="text-sm">No {activeCategory} assets yet</p>
-          <p className="text-xs mt-1">Add assets to /public/assets/{activeCategory}/</p>
-        </div>
+      <div className="flex-1 overflow-y-auto p-3">
+        {loading ? (
+          <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+            <p className="text-sm">Loading assets...</p>
+          </div>
+        ) : currentAssets.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+            <p className="text-sm">No {activeCategory} assets available</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {currentAssets.map((asset, index) => (
+              <button
+                key={index}
+                onClick={() => onSelectAsset(asset.path, assetType)}
+                className="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden hover:ring-2 hover:ring-violet-500 transition-all"
+              >
+                <img
+                  src={asset.path}
+                  alt={asset.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
+                  <div className="w-full p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-medium truncate">{asset.name}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
