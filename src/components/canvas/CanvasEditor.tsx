@@ -37,7 +37,7 @@ export default function CanvasEditor() {
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; layerId: string } | null>(null);
-  const [resizing, setResizing] = useState<{ layerId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
+  const [resizing, setResizing] = useState<{ layerId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number; startLayerX: number; startLayerY: number } | null>(null);
 
   const handleAssetSelect = useCallback((src: string, type: "background" | "overlay" | "cosmetic") => {
     const img = new Image();
@@ -101,11 +101,11 @@ export default function CanvasEditor() {
     );
   }, [zoom]);
 
-  const handleLayerResize = useCallback((layerId: string, newWidth: number, newHeight: number) => {
+  const handleLayerResize = useCallback((layerId: string, newWidth: number, newHeight: number, position?: { x: number; y: number }) => {
     setLayers((prev) =>
       prev.map((layer) =>
         layer.id === layerId
-          ? { ...layer, width: newWidth, height: newHeight }
+          ? { ...layer, width: newWidth, height: newHeight, ...(position? { x: position.x, y: position.y }: {})}
           : layer
       )
     );
@@ -169,6 +169,8 @@ export default function CanvasEditor() {
           startY: e.clientY,
           startWidth: layer.width,
           startHeight: layer.height,
+          startLayerX: layer.x,
+          startLayerY: layer.y,
         });
       }
       return;
@@ -189,8 +191,8 @@ export default function CanvasEditor() {
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isPanning) {
       setCanvasOffset({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y,
+        x: (e.clientX - panStart.x),
+        y: (e.clientY - panStart.y),
       });
       return;
     }
@@ -204,11 +206,22 @@ export default function CanvasEditor() {
 
       let newWidth = resizing.startWidth;
       let newHeight = resizing.startHeight;
+      let newX = resizing.startLayerX;
+      let newY = resizing.startLayerY;
 
       if (resizing.handle.includes('e')) newWidth = resizing.startWidth + dx;
-      if (resizing.handle.includes('w')) newWidth = resizing.startWidth - dx;
+
+      if (resizing.handle.includes('w')) {
+        newWidth = resizing.startWidth - dx;
+        newX = resizing.startLayerX + dx;
+      }
+
       if (resizing.handle.includes('s')) newHeight = resizing.startHeight + dy;
-      if (resizing.handle.includes('n')) newHeight = resizing.startHeight - dy;
+
+      if (resizing.handle.includes('n')) {
+        newHeight = resizing.startHeight - dy;
+        newY = resizing.startLayerY + dy;
+      }
 
       if (layer.aspectRatioLocked) {
         if (resizing.handle.length === 2) {
@@ -217,18 +230,31 @@ export default function CanvasEditor() {
           const heightChange = Math.abs(newHeight - resizing.startHeight);
           
           if (widthChange > heightChange) {
+            const oldHeight = newHeight;
             newHeight = newWidth / ratio;
+            if (resizing.handle.includes('n')) {
+              newY = resizing.startLayerY - (newHeight - resizing.startHeight);
+            }
           } else {
+            const oldWidth = newWidth;
             newWidth = newHeight * ratio;
+            if (resizing.handle.includes('w')) {
+              newX = resizing.startLayerX - (newWidth - resizing.startWidth);
+            }
           }
         } else if (resizing.handle === 'e' || resizing.handle === 'w') {
+          const oldHeight = newHeight;
           newHeight = newWidth / layer.originalAspectRatio;
         } else if (resizing.handle === 'n' || resizing.handle === 's') {
+          const oldWidth = newWidth;
           newWidth = newHeight * layer.originalAspectRatio;
+          if (resizing.handle === 'n') {
+            newX = resizing.startLayerX - (newWidth - resizing.startWidth) / 2;
+          }
         }
       }
 
-      handleLayerResize(resizing.layerId, Math.max(10, newWidth), Math.max(10, newHeight));
+      handleLayerResize(resizing.layerId, Math.max(10, newWidth), Math.max(10, newHeight), { x: newX, y: newY });
       return;
     }
 
@@ -305,48 +331,73 @@ export default function CanvasEditor() {
   }, [layers, viewportOffset]);
 
   return (
-    <section id="editor" className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8">
-      <div className="max-w-[1800px] mx-auto px-4">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Banner Editor
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Canvas: {CANVAS_SIZE}×{CANVAS_SIZE}px | Output: {BANNER_WIDTH}×{BANNER_HEIGHT}px
+    <section id="editor" className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="container mx-auto max-w-7xl px-6 pt-8 pb-24">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Banner Editor</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Create custom LinkedIn banners with drag-and-drop editing.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
-          <AssetLibrary onSelectAsset={handleAssetSelect} />
+        {/* Main Layout: Side-by-side on desktop, stacked on mobile */}
+        <div className="flex flex-col gap-8 lg:flex-row">
+          {/* Controls Panel (Left Side) */}
+          <div className="w-full space-y-6 lg:w-[400px] lg:shrink-0">
+            {/* Asset Library Section */}
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">Assets</h2>
+              <AssetLibrary onSelectAsset={handleAssetSelect} />
+            </section>
 
-          <div className="space-y-4">
-            <Toolbar
-              onUpload={handleFileUpload}
-              onExport={exportBanner}
-            />
+            {/* Upload Section */}
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">Upload</h2>
+              <Toolbar
+                onUpload={handleFileUpload}
+                onExport={exportBanner}
+              />
+            </section>
 
-            <div
-              className="relative bg-[#1e1e1e] dark:bg-[#1e1e1e] rounded-xl overflow-hidden shadow-inner"
-              style={{ height: "700px" }}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onWheel={handleWheel}
-            >
+            {/* Output Settings Section */}
+            <section>
+              <h2 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">Output</h2>
+              <div className="space-y-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Export your banner in PNG or JPEG format
+                </p>
+              </div>
+            </section>
+          </div>
+
+          {/* Canvas & Preview Panel (Right Side) */}
+          <div className="min-w-0 flex-1 space-y-6">
+            {/* Canvas Editor */}
+            <div className="space-y-3">
+              <h2 className="text-sm font-medium text-gray-900 dark:text-white">Canvas</h2>
               <div
-                ref={canvasRef}
-                className="absolute cursor-grab active:cursor-grabbing"
-                style={{
-                  width: CANVAS_SIZE * zoom,
-                  height: CANVAS_SIZE * zoom,
-                  left: `calc(50% + ${canvasOffset.x}px)`,
-                  top: `calc(50% + ${canvasOffset.y}px)`,
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "#ffffff",
-                  boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
-                }}
-                onMouseDown={(e) => handleMouseDown(e)}
+                className="relative bg-[#1e1e1e] dark:bg-[#1e1e1e] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+                style={{ height: "600px" }}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
               >
+                <div
+                  ref={canvasRef}
+                  className="absolute cursor-grab active:cursor-grabbing"
+                  style={{
+                    width: CANVAS_SIZE * zoom,
+                    height: CANVAS_SIZE * zoom,
+                    left: `calc(50% + ${canvasOffset.x}px)`,
+                    top: `calc(50% + ${canvasOffset.y}px)`,
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
+                  }}
+                  onMouseDown={(e) => handleMouseDown(e)}
+                >
                 {/* Layers */}
                 {layers.map((layer) => (
                   layer.visible && (
@@ -418,32 +469,61 @@ export default function CanvasEditor() {
                   )
                 ))}
 
-                {/* Banner viewport overlay */}
-                <div
-                  className="absolute border border-blue-500 pointer-events-none shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
-                  style={{
-                    left: viewportOffset.x * zoom,
-                    top: viewportOffset.y * zoom,
-                    width: BANNER_WIDTH * zoom,
-                    height: BANNER_HEIGHT * zoom,
-                  }}
-                >
-                  <div className="absolute -top-6 left-0 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">
-                    LinkedIn Banner ({BANNER_WIDTH}×{BANNER_HEIGHT})
+                  {/* Banner viewport overlay */}
+                  <div
+                    className="absolute border border-blue-500 pointer-events-none shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
+                    style={{
+                      left: viewportOffset.x * zoom,
+                      top: viewportOffset.y * zoom,
+                      width: BANNER_WIDTH * zoom,
+                      height: BANNER_HEIGHT * zoom,
+                    }}
+                  >
+                    <div className="absolute -top-6 left-0 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">
+                      LinkedIn Banner ({BANNER_WIDTH}×{BANNER_HEIGHT})
+                    </div>
                   </div>
                 </div>
               </div>
-
             </div>
 
-            <PreviewPanel
-              layers={layers}
-              viewportOffset={viewportOffset}
-              bannerWidth={BANNER_WIDTH}
-              bannerHeight={BANNER_HEIGHT}
-              onUpload={handleFileUpload}
-              onExport={exportBanner}
-            />
+            {/* Export Options */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Export</h3>
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+                <button
+                  onClick={() => exportBanner("png")}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download PNG
+                </button>
+                <button
+                  onClick={() => exportBanner("jpeg")}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download JPEG
+                </button>
+              </div>
+            </div>
+
+            {/* Banner Preview Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Banner Previews</h3>
+              <PreviewPanel
+                layers={layers}
+                viewportOffset={viewportOffset}
+                bannerWidth={BANNER_WIDTH}
+                bannerHeight={BANNER_HEIGHT}
+                onUpload={handleFileUpload}
+                onExport={exportBanner}
+              />
+            </div>
           </div>
         </div>
       </div>

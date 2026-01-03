@@ -54,28 +54,24 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
   const assetType = activeCategory === "background" ? "background" : activeCategory === "overlay" ? "overlay" : "cosmetic";
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Asset Library</h3>
-        
-        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide"> 
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.id as AssetCategory)}
-              className={`flex-none px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
-                activeCategory === category.id
-                  ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
+    <div className="space-y-3">
+      <div className="flex gap-2 overflow-x-auto pb-1"> 
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setActiveCategory(category.id as AssetCategory)}
+            className={`flex-none px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+              activeCategory === category.id
+                ? "bg-violet-600 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            }`}
+          >
+            {category.label}
+          </button>
+        ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
         {loading ? (
           <div className="text-center py-8 text-gray-400 dark:text-gray-500">
             <p className="text-sm">Loading assets...</p>
@@ -85,7 +81,7 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
             <p className="text-sm">No {activeCategory} assets available</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {currentAssets.map((asset, index) => (
               <button
                 key={index}
@@ -98,8 +94,8 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
-                  <div className="w-full p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white text-xs font-medium truncate">{asset.name}</p>
+                  <div className="w-full p-1.5 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white text-[10px] font-medium truncate">{asset.name}</p>
                   </div>
                 </div>
               </button>
