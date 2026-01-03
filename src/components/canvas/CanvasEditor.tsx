@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import PreviewPanel from "./PreviewPanel";
-import LayerPanel from "./LayerPanel";
 import Toolbar from "./Toolbar";
 import AssetLibrary from "./AssetLibrary";
 
@@ -18,9 +17,11 @@ export interface Layer {
   src: string;
   visible: boolean;
   locked: boolean;
+  aspectRatioLocked: boolean;
+  originalAspectRatio: number;
 }
 
-const CANVAS_SIZE = 3000;
+const CANVAS_SIZE = 2000;
 const BANNER_WIDTH = 1584;
 const BANNER_HEIGHT = 396;
 
@@ -35,6 +36,8 @@ export default function CanvasEditor() {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; layerId: string } | null>(null);
+  const [resizing, setResizing] = useState<{ layerId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
 
   const handleAssetSelect = useCallback((src: string, type: "background" | "overlay" | "cosmetic") => {
     const img = new Image();
@@ -51,6 +54,8 @@ export default function CanvasEditor() {
         src: src,
         visible: true,
         locked: false,
+        aspectRatioLocked: true,
+        originalAspectRatio: img.width / img.height,
       };
       setLayers((prev) => [...prev, newLayer]);
       setSelectedLayerId(newLayer.id);
@@ -75,6 +80,8 @@ export default function CanvasEditor() {
           src: e.target?.result as string,
           visible: true,
           locked: false,
+          aspectRatioLocked: true,
+          originalAspectRatio: img.width / img.height,
         };
         setLayers((prev) => [...prev, newLayer]);
         setSelectedLayerId(newLayer.id);
@@ -111,19 +118,59 @@ export default function CanvasEditor() {
     }
   }, [selectedLayerId]);
 
-  const handleLayerReorder = useCallback((fromIndex: number, toIndex: number) => {
+  const handleBringForward = useCallback((layerId: string) => {
     setLayers((prev) => {
-      const newLayers = [...prev];
-      const [removed] = newLayers.splice(fromIndex, 1);
-      newLayers.splice(toIndex, 0, removed);
-      return newLayers;
+      const index = prev.findIndex((l) => l.id === layerId);
+      if (index < prev.length - 1) {
+        const newLayers = [...prev];
+        [newLayers[index], newLayers[index + 1]] = [newLayers[index + 1], newLayers[index]];
+        return newLayers;
+      }
+      return prev;
     });
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent, layerId?: string) => {
+  const handleSendBack = useCallback((layerId: string) => {
+    setLayers((prev) => {
+      const index = prev.findIndex((l) => l.id === layerId);
+      if (index > 0) {
+        const newLayers = [...prev];
+        [newLayers[index], newLayers[index - 1]] = [newLayers[index - 1], newLayers[index]];
+        return newLayers;
+      }
+      return prev;
+    });
+  }, []);
+
+  const handleToggleAspectRatio = useCallback((layerId: string) => {
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === layerId
+          ? { ...layer, aspectRatioLocked: !layer.aspectRatioLocked }
+          : layer
+      )
+    );
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent, layerId?: string, handle?: string) => {
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - canvasOffset.x, y: e.clientY - canvasOffset.y });
+      return;
+    }
+
+    if (handle && layerId) {
+      const layer = layers.find((l) => l.id === layerId);
+      if (layer && !layer.locked) {
+        setResizing({
+          layerId,
+          handle,
+          startX: e.clientX,
+          startY: e.clientY,
+          startWidth: layer.width,
+          startHeight: layer.height,
+        });
+      }
       return;
     }
 
@@ -148,18 +195,69 @@ export default function CanvasEditor() {
       return;
     }
 
+    if (resizing) {
+      const layer = layers.find((l) => l.id === resizing.layerId);
+      if (!layer) return;
+
+      const dx = (e.clientX - resizing.startX) / zoom;
+      const dy = (e.clientY - resizing.startY) / zoom;
+
+      let newWidth = resizing.startWidth;
+      let newHeight = resizing.startHeight;
+
+      if (resizing.handle.includes('e')) newWidth = resizing.startWidth + dx;
+      if (resizing.handle.includes('w')) newWidth = resizing.startWidth - dx;
+      if (resizing.handle.includes('s')) newHeight = resizing.startHeight + dy;
+      if (resizing.handle.includes('n')) newHeight = resizing.startHeight - dy;
+
+      if (layer.aspectRatioLocked) {
+        if (resizing.handle.length === 2) {
+          const ratio = layer.originalAspectRatio;
+          const widthChange = Math.abs(newWidth - resizing.startWidth);
+          const heightChange = Math.abs(newHeight - resizing.startHeight);
+          
+          if (widthChange > heightChange) {
+            newHeight = newWidth / ratio;
+          } else {
+            newWidth = newHeight * ratio;
+          }
+        } else if (resizing.handle === 'e' || resizing.handle === 'w') {
+          newHeight = newWidth / layer.originalAspectRatio;
+        } else if (resizing.handle === 'n' || resizing.handle === 's') {
+          newWidth = newHeight * layer.originalAspectRatio;
+        }
+      }
+
+      handleLayerResize(resizing.layerId, Math.max(10, newWidth), Math.max(10, newHeight));
+      return;
+    }
+
     if (isDragging && selectedLayerId) {
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
       handleLayerMove(selectedLayerId, dx, dy);
       setDragStart({ x: e.clientX, y: e.clientY });
     }
-  }, [isPanning, panStart, isDragging, selectedLayerId, dragStart, handleLayerMove]);
+  }, [isPanning, panStart, resizing, isDragging, selectedLayerId, dragStart, handleLayerMove, handleLayerResize, layers, zoom]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setIsPanning(false);
+    setResizing(null);
   }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, layerId: string) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, layerId });
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    if (contextMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [contextMenu]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
@@ -218,15 +316,13 @@ export default function CanvasEditor() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
           <AssetLibrary onSelectAsset={handleAssetSelect} />
 
           <div className="space-y-4">
             <Toolbar
               onUpload={handleFileUpload}
               onExport={exportBanner}
-              zoom={zoom}
-              onZoomChange={setZoom}
             />
 
             <div
@@ -272,6 +368,7 @@ export default function CanvasEditor() {
                         e.stopPropagation();
                         handleMouseDown(e, layer.id);
                       }}
+                      onContextMenu={(e) => handleContextMenu(e, layer.id)}
                     >
                       <img
                         src={layer.src}
@@ -281,10 +378,40 @@ export default function CanvasEditor() {
                       />
                       {selectedLayerId === layer.id && !layer.locked && (
                         <>
-                          <div className="absolute -top-1 -left-1 w-3 h-3 bg-violet-500 rounded-full cursor-nw-resize" />
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-violet-500 rounded-full cursor-ne-resize" />
-                          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-violet-500 rounded-full cursor-sw-resize" />
-                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-violet-500 rounded-full cursor-se-resize" />
+                          {/* Corner handles */}
+                          <div 
+                            className="absolute -top-1 -left-1 w-3 h-3 bg-violet-500 rounded-full cursor-nw-resize z-10" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'nw'); }}
+                          />
+                          <div 
+                            className="absolute -top-1 -right-1 w-3 h-3 bg-violet-500 rounded-full cursor-ne-resize z-10" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'ne'); }}
+                          />
+                          <div 
+                            className="absolute -bottom-1 -left-1 w-3 h-3 bg-violet-500 rounded-full cursor-sw-resize z-10" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'sw'); }}
+                          />
+                          <div 
+                            className="absolute -bottom-1 -right-1 w-3 h-3 bg-violet-500 rounded-full cursor-se-resize z-10" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'se'); }}
+                          />
+                          {/* Side handles */}
+                          <div 
+                            className="absolute top-1/2 -left-1 w-3 h-3 bg-violet-500 rounded-full cursor-w-resize z-10 -translate-y-1/2" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'w'); }}
+                          />
+                          <div 
+                            className="absolute top-1/2 -right-1 w-3 h-3 bg-violet-500 rounded-full cursor-e-resize z-10 -translate-y-1/2" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'e'); }}
+                          />
+                          <div 
+                            className="absolute left-1/2 -top-1 w-3 h-3 bg-violet-500 rounded-full cursor-n-resize z-10 -translate-x-1/2" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 'n'); }}
+                          />
+                          <div 
+                            className="absolute left-1/2 -bottom-1 w-3 h-3 bg-violet-500 rounded-full cursor-s-resize z-10 -translate-x-1/2" 
+                            onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e, layer.id, 's'); }}
+                          />
                         </>
                       )}
                     </div>
@@ -307,10 +434,6 @@ export default function CanvasEditor() {
                 </div>
               </div>
 
-              {/* Zoom indicator */}
-              <div className="absolute bottom-4 left-4 bg-gray-900/90 backdrop-blur-sm px-3 py-1.5 rounded-md shadow-lg text-sm font-medium text-white">
-                {Math.round(zoom * 100)}%
-              </div>
             </div>
 
             <PreviewPanel
@@ -318,25 +441,59 @@ export default function CanvasEditor() {
               viewportOffset={viewportOffset}
               bannerWidth={BANNER_WIDTH}
               bannerHeight={BANNER_HEIGHT}
+              onUpload={handleFileUpload}
+              onExport={exportBanner}
             />
           </div>
-
-          <LayerPanel
-            layers={layers}
-            selectedLayerId={selectedLayerId}
-            onSelectLayer={setSelectedLayerId}
-            onDeleteLayer={handleLayerDelete}
-            onReorderLayers={handleLayerReorder}
-            onUpdateLayer={(id: string, updates: Partial<Layer>) => {
-              setLayers((prev) =>
-                prev.map((layer) =>
-                  layer.id === id ? { ...layer, ...updates } : layer
-                )
-              );
-            }}
-          />
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+        >
+          <button
+            onClick={() => {
+              handleBringForward(contextMenu.layerId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
+            Bring Forward
+          </button>
+          <button
+            onClick={() => {
+              handleSendBack(contextMenu.layerId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
+            Send Back
+          </button>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+          <button
+            onClick={() => {
+              handleToggleAspectRatio(contextMenu.layerId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
+            {layers.find(l => l.id === contextMenu.layerId)?.aspectRatioLocked ? 'Unlock Ratio' : 'Lock Ratio'}
+          </button>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+          <button
+            onClick={() => {
+              handleLayerDelete(contextMenu.layerId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </section>
   );
 }
