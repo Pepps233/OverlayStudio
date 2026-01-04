@@ -102,7 +102,7 @@ export default function HeroSection() {
 
           {/* VIEW ON GITHUB BUTTON - Now identical style */}
           <a
-            href="https://github.com"
+            href="https://github.com/Pepps233/OverlayStudio"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full sm:w-auto"

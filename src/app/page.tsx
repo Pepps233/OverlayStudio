@@ -37,7 +37,7 @@ export default function Home() {
           </p>
           <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-500 flex-wrap">
             <a
-              href="https://github.com"
+              href="https://github.com/Pepps233/OverlayStudio"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1.5"
