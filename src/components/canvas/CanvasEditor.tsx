@@ -463,6 +463,18 @@ export default function CanvasEditor() {
               <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 Assets
               </h2>
+              <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">
+                Didn't find your favorite animal, city, or cosmetic item? Contribute your images to the{" "}
+                <a 
+                  href="https://github.com/Pepps233/OverlayStudio" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 underline"
+                >
+                  repository
+                </a>
+                !
+              </p>
               <AssetLibrary onSelectAsset={handleAssetSelect} />
             </section>
 
