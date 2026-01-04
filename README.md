@@ -15,24 +15,24 @@
 
 ---
 
-## 🎨 About
+## About
 
 Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-and-drop editor. Inspired by [ogis.dev](https://ogis.dev/) (check out the [original project](https://github.com/twangodev/ogis)), this tool lets you create professional, eye-catching banners with custom backgrounds, overlays, and cosmetic elements.
 
-### ✨ Key Features
+### Key Features
 
-- **🖱️ Drag-and-Drop Canvas Editor** - Intuitive interface for positioning and resizing elements
-- **🎭 Asset Library** - Pre-loaded backgrounds, animal overlays, and cosmetic accessories
-- **📤 Custom Image Upload** - Add your own images (recommended: 1584 × 396 px)
-- **🔄 Layer Management** - Reorder, lock, and manage multiple layers with ease
-- **🎯 Smart Snapping** - Auto-fit backgrounds to banner dimensions
-- **🔒 Aspect Ratio Lock** - Maintain proportions while resizing
-- **💾 Export Options** - Download as PNG (lossless) or JPEG (smaller file size)
-- **🎨 Real-time Preview** - See your changes instantly
-- **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
-- **🌙 Dark Mode Support** - Beautiful UI in both light and dark themes
+- **️Drag-and-Drop Canvas Editor** - Intuitive interface for positioning and resizing elements
+- **Asset Library** - Pre-loaded backgrounds, animal overlays, and cosmetic accessories
+- **Custom Image Upload** - Add your own images (recommended: 1584 × 396 px)
+- **Layer Management** - Reorder, lock, and manage multiple layers with ease
+- **Smart Snapping** - Auto-fit backgrounds to banner dimensions
+- **Aspect Ratio Lock** - Maintain proportions while resizing
+- **Export Options** - Download as PNG (lossless) or JPEG (smaller file size)
+- **Real-time Preview** - See your changes instantly
+- **Responsive Design** - Works on both desktop and mobile devices
+- **AI-Powered Image Blending** - blend two images seamlessly, put a hat on a cat!
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -69,7 +69,7 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
-## 🎯 Usage
+## Usage
 
 1. **Choose a Background** - Select from pre-loaded city backgrounds or upload your own
 2. **Add Overlays** - Choose from cute animals (cats, dogs, seals, sea lions)
@@ -78,13 +78,13 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
 5. **Layer Management** - Right-click elements to bring forward, send back, or lock aspect ratio
 6. **Export** - Download your banner as PNG or JPEG
 
-### 🎨 Asset Categories
+### Asset Categories
 
 - **Backgrounds**: City landscapes (NYC, Seattle, Chicago, Austin, Golden Gate Bridge)
 - **Overlays**: Animal images (4 cats, 2 dogs, 1 sea lion, 1 seal)
 - **Cosmetics**: 8 different hat styles
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 16.1](https://nextjs.org/) with App Router
 - **UI Library**: [React 19.2](https://reactjs.org/)
@@ -93,7 +93,7 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
 - **Fonts**: Geist Sans, Geist Mono, Rancho (Google Fonts)
 - **Build Tool**: [Turbopack](https://turbo.build/)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 OverlayStudio/
@@ -121,7 +121,7 @@ OverlayStudio/
 └── package.json
 ```
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
 
@@ -133,17 +133,17 @@ We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for 
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Inspired by [ogis.dev](https://ogis.dev/) by [twangodev](https://github.com/twangodev/ogis)
 - Built with [Next.js](https://nextjs.org/)
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 
-## 📧 Contact
+## Contact
 
 Project Link: [https://github.com/Pepps233/OverlayStudio](https://github.com/Pepps233/OverlayStudio)
 
