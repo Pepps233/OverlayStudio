@@ -1,8 +1,8 @@
 # Contributing to Overlay Studio
 
-First off, thank you for considering contributing to Overlay Studio! It's people like you that make Overlay Studio such a great tool. 🎉
+First off, thank you for considering contributing to Overlay Studio! It's people like you that make Overlay Studio such a great tool.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [How Can I Contribute?](#how-can-i-contribute)
@@ -15,7 +15,7 @@ First off, thank you for considering contributing to Overlay Studio! It's people
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 This project and everyone participating in it is governed by our commitment to fostering an open and welcoming environment. By participating, you are expected to uphold this code:
 
@@ -25,7 +25,7 @@ This project and everyone participating in it is governed by our commitment to f
 - Focus on what is best for the community
 - Show empathy towards other community members
 
-## 🤝 How Can I Contribute?
+## How Can I Contribute?
 
 ### Reporting Bugs
 
@@ -55,7 +55,7 @@ Unsure where to begin? Look for issues labeled:
 - `bug` - Bug fixes are always appreciated
 - `enhancement` - Feature improvements
 
-## 🛠️ Development Setup
+## Development Setup
 
 ### Prerequisites
 
@@ -103,7 +103,7 @@ git checkout main
 git merge upstream/main
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 OverlayStudio/
@@ -132,7 +132,7 @@ OverlayStudio/
 - **`src/components/canvas/Toolbar.tsx`** - Upload and toolbar controls
 - **`src/app/page.tsx`** - Main landing page
 
-## 💻 Coding Guidelines
+## Coding Guidelines
 
 ### TypeScript
 
@@ -158,7 +158,6 @@ OverlayStudio/
 ### Code Style
 
 ```typescript
-// Good: Clear, typed, functional component
 interface ButtonProps {
   onClick: () => void;
   label: string;
@@ -185,7 +184,7 @@ export default function Button({ onClick, label, disabled = false }: ButtonProps
 - Implement proper loading states
 - Avoid unnecessary re-renders
 
-## 📝 Commit Guidelines
+## Commit Guidelines
 
 We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
@@ -220,7 +219,7 @@ style(toolbar): improve button spacing
 refactor(asset-library): simplify asset loading logic
 ```
 
-## 🔄 Pull Request Process
+## Pull Request Process
 
 1. **Ensure your code follows the coding guidelines**
 2. **Update documentation** if you're changing functionality
@@ -253,7 +252,7 @@ docs: improve contributing guidelines
 - [ ] I have tested my changes thoroughly
 - [ ] Any dependent changes have been merged
 
-## 🎨 Adding New Assets
+## Adding New Assets
 
 ### Background Images
 
@@ -283,7 +282,7 @@ const backgrounds = [
 3. Keep consistent sizing
 4. Update `AssetLibrary.tsx`
 
-## 🐛 Reporting Bugs
+## Reporting Bugs
 
 ### Before Submitting
 
@@ -318,7 +317,7 @@ If applicable, add screenshots.
 Any other relevant information.
 ```
 
-## 💡 Suggesting Enhancements
+## Suggesting Enhancements
 
 ### Enhancement Template
 
@@ -336,7 +335,7 @@ Other solutions you've thought about.
 Screenshots, mockups, or examples.
 ```
 
-## 🎯 Development Tips
+## Development Tips
 
 ### Testing Your Changes
 
@@ -372,13 +371,13 @@ Contributors will be recognized in:
 - Project documentation
 - Release notes (for significant contributions)
 
-## 📞 Getting Help
+## Getting Help
 
 - **GitHub Issues**: For bugs and feature requests
 - **Discussions**: For questions and general discussion
 - **Pull Requests**: For code review and collaboration
 
-## 📄 License
+## License
 
 By contributing to Overlay Studio, you agree that your contributions will be licensed under the MIT License.
 
