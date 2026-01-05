@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { withBasePath } from "@/utils/basePath";
 
 interface AssetLibraryProps {
   onSelectAsset: (src: string, type: "background" | "overlay" | "cosmetic") => void;
@@ -27,35 +28,35 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
       setLoading(true);
       try {
         const backgrounds = [
-          { name: "Golden Gate Bridge", path: "/assets/background/golden_gate_bridge_1.jpg" },
-          { name: "New York City", path: "/assets/background/nyc.jpeg" },
-          { name: "Seattle", path: "/assets/background/seattle.jpg" },
-          { name: "Chicago", path: "/assets/background/chicago.png" },
-          { name: "Austin", path: "/assets/background/austin.jpeg" },
+          { name: "Golden Gate Bridge", path: withBasePath("/assets/background/golden_gate_bridge_1.jpg") },
+          { name: "New York City", path: withBasePath("/assets/background/nyc.jpeg") },
+          { name: "Seattle", path: withBasePath("/assets/background/seattle.jpg") },
+          { name: "Chicago", path: withBasePath("/assets/background/chicago.png") },
+          { name: "Austin", path: withBasePath("/assets/background/austin.jpeg") },
         ];
 
         const overlays = [
-          { name: "Cat 1", path: "/assets/overlay/Cat1.png" },
-          { name: "Cat 2", path: "/assets/overlay/Cat2.png" },
-          { name: "Cat 3", path: "/assets/overlay/Cat3.png" },
-          { name: "Cat 4", path: "/assets/overlay/Cat4.png" },
-          { name: "Dog 1", path: "/assets/overlay/Dog1.png" },
-          { name: "Dog 2", path: "/assets/overlay/Dog2.png" },
-          { name: "Dog 3", path: "/assets/overlay/Dog3.png" },
-          { name: "Dog 4", path: "/assets/overlay/Dog4.png" },
-          { name: "Sea Lion 1", path: "/assets/overlay/Sea_Lion1.png" },
-          { name: "Seal 1", path: "/assets/overlay/Seal1.png" },
+          { name: "Cat 1", path: withBasePath("/assets/overlay/Cat1.png") },
+          { name: "Cat 2", path: withBasePath("/assets/overlay/Cat2.png") },
+          { name: "Cat 3", path: withBasePath("/assets/overlay/Cat3.png") },
+          { name: "Cat 4", path: withBasePath("/assets/overlay/Cat4.png") },
+          { name: "Dog 1", path: withBasePath("/assets/overlay/Dog1.png") },
+          { name: "Dog 2", path: withBasePath("/assets/overlay/Dog2.png") },
+          { name: "Dog 3", path: withBasePath("/assets/overlay/Dog3.png") },
+          { name: "Dog 4", path: withBasePath("/assets/overlay/Dog4.png") },
+          { name: "Sea Lion 1", path: withBasePath("/assets/overlay/Sea_Lion1.png") },
+          { name: "Seal 1", path: withBasePath("/assets/overlay/Seal1.png") },
         ];
 
         const cosmetics = [
-          { name: "Hat 1", path: "/assets/cosmetic/Hat1.png" },
-          { name: "Hat 2", path: "/assets/cosmetic/Hat2.png" },
-          { name: "Hat 3", path: "/assets/cosmetic/Hat3.png" },
-          { name: "Hat 4", path: "/assets/cosmetic/Hat4.png" },
-          { name: "Hat 5", path: "/assets/cosmetic/Hat5.png" },
-          { name: "Hat 6", path: "/assets/cosmetic/Hat6.png" },
-          { name: "Hat 7", path: "/assets/cosmetic/Hat7.png" },
-          { name: "Hat 8", path: "/assets/cosmetic/Hat8.png" },
+          { name: "Hat 1", path: withBasePath("/assets/cosmetic/Hat1.png") },
+          { name: "Hat 2", path: withBasePath("/assets/cosmetic/Hat2.png") },
+          { name: "Hat 3", path: withBasePath("/assets/cosmetic/Hat3.png") },
+          { name: "Hat 4", path: withBasePath("/assets/cosmetic/Hat4.png") },
+          { name: "Hat 5", path: withBasePath("/assets/cosmetic/Hat5.png") },
+          { name: "Hat 6", path: withBasePath("/assets/cosmetic/Hat6.png") },
+          { name: "Hat 7", path: withBasePath("/assets/cosmetic/Hat7.png") },
+          { name: "Hat 8", path: withBasePath("/assets/cosmetic/Hat8.png") },
         ];
         
         setAssets({
