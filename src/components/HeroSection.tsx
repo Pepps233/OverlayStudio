@@ -1,8 +1,25 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function HeroSection() {
+  const [bannerCount, setBannerCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        setBannerCount(data.count);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+        setBannerCount(0);
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <section className="min-h-screen w-full flex flex-col items-center justify-center px-6 pt-20 relative overflow-hidden">
       {/* Hero Overlay Image */}
@@ -99,6 +116,23 @@ export default function HeroSection() {
               </svg>
             </div>
           </a>
+
+          {/* BANNER COUNTER */}
+          <div className="flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-violet-200 dark:border-violet-700 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-violet-600 dark:text-violet-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Banners Generated</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {bannerCount === null ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  bannerCount.toLocaleString()
+                )}
+              </span>
+            </div>
+          </div>
 
           {/* VIEW ON GITHUB BUTTON - Now identical style */}
           <a
