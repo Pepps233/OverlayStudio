@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import PreviewPanel from "./PreviewPanel";
 import Toolbar from "./Toolbar";
 import AssetLibrary from "./AssetLibrary";
+import { trackDownload } from "@/utils/analytics";
 
 export interface Layer {
   id: string;
@@ -565,6 +566,13 @@ export default function CanvasEditor() {
 
   const exportBanner = useCallback(async (format: "png" | "jpeg") => {
     setExportDropdownOpen(false);
+    
+    // Track download analytics (with rate limiting)
+    trackDownload(format).catch(err => {
+      console.error('Analytics tracking failed:', err);
+      // Continue with download even if tracking fails
+    });
+    
     const canvas = document.createElement("canvas");
     canvas.width = BANNER_WIDTH;
     canvas.height = BANNER_HEIGHT;
