@@ -19,6 +19,7 @@ export interface Layer {
   locked: boolean;
   aspectRatioLocked: boolean;
   originalAspectRatio: number;
+  linkedTo?: string;
 }
 
 const CANVAS_SIZE = 2000;
@@ -42,6 +43,9 @@ export default function CanvasEditor() {
   const [containerWidth, setContainerWidth] = useState(600);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [rotating, setRotating] = useState<{ layerId: string; startAngle: number; centerX: number; centerY: number } | null>(null);
+  const [linkingMode, setLinkingMode] = useState<string | null>(null);
+  const [linkedPairs, setLinkedPairs] = useState<Array<{ id1: string; id2: string }>>([]);
 
   // Responsive container width observer
   useEffect(() => {
@@ -170,6 +174,45 @@ export default function CanvasEditor() {
     );
   }, []);
 
+  const handleLinkToggle = useCallback((layerId: string) => {
+    if (linkingMode === null) {
+      setLinkingMode(layerId);
+    } else if (linkingMode === layerId) {
+      setLinkingMode(null);
+    } else {
+      const existingPairIndex = linkedPairs.findIndex(
+        p => (p.id1 === linkingMode && p.id2 === layerId) || (p.id1 === layerId && p.id2 === linkingMode)
+      );
+      
+      if (existingPairIndex >= 0) {
+        setLinkedPairs(prev => prev.filter((_, i) => i !== existingPairIndex));
+      } else {
+        setLinkedPairs(prev => [...prev, { id1: linkingMode, id2: layerId }]);
+      }
+      setLinkingMode(null);
+    }
+    setContextMenu(null);
+  }, [linkingMode, linkedPairs]);
+
+  const getLinkedLayerId = useCallback((layerId: string): string | null => {
+    const pair = linkedPairs.find(p => p.id1 === layerId || p.id2 === layerId);
+    if (!pair) return null;
+    return pair.id1 === layerId ? pair.id2 : pair.id1;
+  }, [linkedPairs]);
+
+  const calculateAngle = (centerX: number, centerY: number, pointX: number, pointY: number): number => {
+    return Math.atan2(pointY - centerY, pointX - centerX) * (180 / Math.PI);
+  };
+
+  const handleRotationStart = useCallback((e: React.MouseEvent, layerId: string, centerX: number, centerY: number) => {
+    e.stopPropagation();
+    const startAngle = calculateAngle(centerX, centerY, e.clientX, e.clientY);
+    const layer = layers.find(l => l.id === layerId);
+    if (layer) {
+      setRotating({ layerId, startAngle: startAngle - layer.rotation, centerX, centerY });
+    }
+  }, [layers]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent, layerId?: string, handle?: string) => {
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
       setIsPanning(true);
@@ -237,6 +280,20 @@ export default function CanvasEditor() {
     const rect = canvasRef.current!.getBoundingClientRect();
     const currentScale = rect.width / BANNER_WIDTH;
 
+    if (rotating) {
+      const currentAngle = calculateAngle(rotating.centerX, rotating.centerY, e.clientX, e.clientY);
+      const newRotation = currentAngle - rotating.startAngle;
+      
+      setLayers(prev =>
+        prev.map(layer =>
+          layer.id === rotating.layerId
+            ? { ...layer, rotation: newRotation }
+            : layer
+        )
+      );
+      return;
+    }
+
     if (resizing) {
       const layer = layers.find((l) => l.id === resizing.layerId);
       if (!layer) return;
@@ -296,28 +353,46 @@ export default function CanvasEditor() {
     }
 
     if (isDragging && selectedLayerId) {
-      // Requirement 1: STRICT DRAGGING LOGIC
-      // Calculate current mouse world position
       const mouseVisualX = e.clientX - rect.left;
       const mouseVisualY = e.clientY - rect.top;
       
       const mouseWorldX = viewportOffset.x + (mouseVisualX / currentScale);
       const mouseWorldY = viewportOffset.y + (mouseVisualY / currentScale);
 
-      setLayers(prev =>
-        prev.map(layer =>
-          layer.id === selectedLayerId
-          ? {
-            ...layer,
-            // Apply the exact offset calculated on MouseDown
-            x: mouseWorldX - dragOffset.x,
-            y: mouseWorldY - dragOffset.y,
+      const newX = mouseWorldX - dragOffset.x;
+      const newY = mouseWorldY - dragOffset.y;
+
+      setLayers(prev => {
+        const selectedLayer = prev.find(l => l.id === selectedLayerId);
+        if (!selectedLayer) return prev;
+
+        const linkedId = getLinkedLayerId(selectedLayerId);
+        
+        if (linkedId) {
+          const linkedLayer = prev.find(l => l.id === linkedId);
+          if (linkedLayer) {
+            const deltaX = newX - selectedLayer.x;
+            const deltaY = newY - selectedLayer.y;
+            
+            return prev.map(layer => {
+              if (layer.id === selectedLayerId) {
+                return { ...layer, x: newX, y: newY };
+              } else if (layer.id === linkedId) {
+                return { ...layer, x: linkedLayer.x + deltaX, y: linkedLayer.y + deltaY };
+              }
+              return layer;
+            });
           }
-          : layer
-        )
-      );
+        }
+        
+        return prev.map(layer =>
+          layer.id === selectedLayerId
+            ? { ...layer, x: newX, y: newY }
+            : layer
+        );
+      });
     }
-  }, [isPanning, panStart, resizing, isDragging, selectedLayerId, viewportOffset, dragOffset, handleLayerResize, layers]);
+  }, [isPanning, panStart, rotating, resizing, isDragging, selectedLayerId, viewportOffset, dragOffset, handleLayerResize, layers, getLinkedLayerId]);
 
   const handleMouseUp = useCallback(() => {
     // Requirement 3: AUTO-FIT LOGIC
@@ -363,6 +438,7 @@ export default function CanvasEditor() {
     setIsDragging(false);
     setIsPanning(false);
     setResizing(null);
+    setRotating(null);
   }, [isDragging, selectedLayerId, layers, viewportOffset]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent, layerId: string) => {
@@ -611,6 +687,23 @@ export default function CanvasEditor() {
                         />
                         {selectedLayerId === layer.id && !layer.locked && (
                           <>
+                            {/* Rotation handle */}
+                            <div
+                              className="absolute -top-8 left-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing z-20"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                const rect = canvasRef.current!.getBoundingClientRect();
+                                const centerX = rect.left + layerX + layerW / 2;
+                                const centerY = rect.top + layerY + layerH / 2;
+                                handleRotationStart(e, layer.id, centerX, centerY);
+                              }}
+                            >
+                              <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                              </div>
+                            </div>
                             {/* Corner handles */}
                             <div 
                               className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-violet-500 rounded-full cursor-nw-resize z-10 border-2 border-white shadow-sm" 
@@ -690,6 +783,52 @@ export default function CanvasEditor() {
               </div>
             </div>
 
+            {/* Linked Images Log and Fit Button */}
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Linked Images</h3>
+                <button
+                  disabled={true}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                >
+                  Fit
+                </button>
+              </div>
+              {linkedPairs.length === 0 ? (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                  No linked images. Right-click images and select "Link" to connect them.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {linkedPairs.map((pair, index) => {
+                    const layer1 = layers.find(l => l.id === pair.id1);
+                    const layer2 = layers.find(l => l.id === pair.id2);
+                    return (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">{layer1?.name || 'Unknown'}</span>
+                          <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">{layer2?.name || 'Unknown'}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setLinkedPairs(prev => prev.filter((_, i) => i !== index));
+                          }}
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* Banner Preview Section */}
             <div className="space-y-3">
               <PreviewPanel
@@ -738,6 +877,17 @@ export default function CanvasEditor() {
             className="w-full px-4 py-2.5 text-left text-sm hover:bg-violet-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center gap-2"
           >
             {layers.find(l => l.id === contextMenu.layerId)?.aspectRatioLocked ? 'Unlock Ratio' : 'Lock Ratio'}
+          </button>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+          <button
+            onClick={() => handleLinkToggle(contextMenu.layerId)}
+            className={`w-full px-4 py-2.5 text-left text-sm hover:bg-violet-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
+              linkingMode === contextMenu.layerId || getLinkedLayerId(contextMenu.layerId)
+                ? 'text-blue-600 dark:text-blue-400 font-medium'
+                : 'text-gray-700 dark:text-gray-200'
+            }`}
+          >
+            {linkingMode === contextMenu.layerId ? 'Cancel Link' : getLinkedLayerId(contextMenu.layerId) ? 'Unlink' : 'Link'}
           </button>
           <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
           <button
