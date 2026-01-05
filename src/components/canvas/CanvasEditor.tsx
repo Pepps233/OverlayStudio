@@ -46,6 +46,17 @@ export default function CanvasEditor() {
   const [rotating, setRotating] = useState<{ layerId: string; startAngle: number; centerX: number; centerY: number } | null>(null);
   const [linkingMode, setLinkingMode] = useState<string | null>(null);
   const [linkedPairs, setLinkedPairs] = useState<Array<{ id1: string; id2: string }>>([]);
+  const [isBlending, setIsBlending] = useState(false);
+  const [zoomMode, setZoomMode] = useState(false);
+  const [zoomViewport, setZoomViewport] = useState({ x: 0, y: 0, scale: 1 });
+  const [draggedLayerType, setDraggedLayerType] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!zoomMode) {
+      setZoomViewport({ x: 0, y: 0, scale: 1 });
+      setDraggedLayerType(null);
+    }
+  }, [zoomMode]);
 
   // Responsive container width observer
   useEffect(() => {
@@ -246,6 +257,7 @@ export default function CanvasEditor() {
       if (layer && !layer.locked) {
         setSelectedLayerId(layerId);
         setIsDragging(true);
+        setDraggedLayerType(layer.type);
 
         // Requirement 1: STRICT DRAGGING LOGIC
         // We calculate the mouse position in "World Coordinates" (1584x396 space)
@@ -264,10 +276,79 @@ export default function CanvasEditor() {
       }
     } else {
       setSelectedLayerId(null);
+      setDraggedLayerType(null);
     }
   }, [layers, canvasOffset, viewportOffset]);
 
+  const handleBlendImages = useCallback(async () => {
+    if (linkedPairs.length === 0) return;
+    
+    setIsBlending(true);
+    try {
+      const { blendImagesWithSeamlessClone } = await import('@/utils/opencvBlending');
+      
+      for (const pair of linkedPairs) {
+        const layer1 = layers.find(l => l.id === pair.id1);
+        const layer2 = layers.find(l => l.id === pair.id2);
+        
+        if (layer1 && layer2) {
+          const blendResult = await blendImagesWithSeamlessClone(
+            layer1,
+            layer2,
+            BANNER_WIDTH,
+            BANNER_HEIGHT
+          );
+          
+          if (blendResult) {
+            const newLayer: Layer = {
+              id: `blended-${Date.now()}`,
+              type: 'image',
+              name: 'Blended Result',
+              x: blendResult.bounds.x,
+              y: blendResult.bounds.y,
+              width: blendResult.bounds.width,
+              height: blendResult.bounds.height,
+              rotation: 0,
+              src: blendResult.dataUrl,
+              visible: true,
+              locked: false,
+              aspectRatioLocked: true,
+              originalAspectRatio: blendResult.bounds.width / blendResult.bounds.height,
+            };
+            
+            setLayers(prev => [
+              ...prev.filter(l => l.id !== pair.id1 && l.id !== pair.id2),
+              newLayer
+            ]);
+            
+            setLinkedPairs(prev => prev.filter(p => p.id1 !== pair.id1 && p.id2 !== pair.id2));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Blending failed:', error);
+    } finally {
+      setIsBlending(false);
+    }
+  }, [linkedPairs, layers, viewportOffset]);
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (zoomMode && isDragging && draggedLayerType === 'decoration') {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        const targetX = viewportOffset.x + (mouseX / rect.width) * BANNER_WIDTH;
+        const targetY = viewportOffset.y + (mouseY / rect.height) * BANNER_HEIGHT;
+        
+        setZoomViewport({
+          x: targetX - BANNER_WIDTH / 4,
+          y: targetY - BANNER_HEIGHT / 4,
+          scale: 2
+        });
+      }
+    }
     if (isPanning) {
       setCanvasOffset({
         x: (e.clientX - panStart.x),
@@ -439,7 +520,12 @@ export default function CanvasEditor() {
     setIsPanning(false);
     setResizing(null);
     setRotating(null);
-  }, [isDragging, selectedLayerId, layers, viewportOffset]);
+    setDraggedLayerType(null);
+    
+    if (zoomMode) {
+      setZoomViewport({ x: 0, y: 0, scale: 1 });
+    }
+  }, [isDragging, selectedLayerId, layers, viewportOffset, zoomMode]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent, layerId: string) => {
     e.preventDefault();
@@ -561,6 +647,8 @@ export default function CanvasEditor() {
             <Toolbar
               onUpload={handleFileUpload}
               onExport={exportBanner}
+              zoomMode={zoomMode}
+              onZoomModeToggle={() => setZoomMode(prev => !prev)}
             />
 
             {/* Download Button */}
@@ -788,10 +876,15 @@ export default function CanvasEditor() {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Linked Images</h3>
                 <button
-                  disabled={true}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  disabled={linkedPairs.length === 0 || isBlending}
+                  onClick={handleBlendImages}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    linkedPairs.length === 0 || isBlending
+                      ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm hover:shadow-md'
+                  }`}
                 >
-                  Fit
+                  {isBlending ? 'Blending...' : 'Fit'}
                 </button>
               </div>
               {linkedPairs.length === 0 ? (
@@ -838,6 +931,7 @@ export default function CanvasEditor() {
                 bannerHeight={BANNER_HEIGHT}
                 onUpload={handleFileUpload}
                 onExport={exportBanner}
+                zoomViewport={zoomMode ? zoomViewport : undefined}
               />
             </div>
           </div>

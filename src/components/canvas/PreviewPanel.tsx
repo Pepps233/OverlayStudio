@@ -10,6 +10,7 @@ interface PreviewPanelProps {
   bannerHeight: number;
   onUpload: (file: File, type: "background" | "decoration") => void;
   onExport: (format: "png" | "jpeg") => void;
+  zoomViewport?: { x: number; y: number; scale: number };
 }
 
 export default function PreviewPanel({
@@ -17,6 +18,7 @@ export default function PreviewPanel({
   viewportOffset,
   bannerWidth,
   bannerHeight,
+  zoomViewport,
 }: PreviewPanelProps) {
   const bannerCanvasRef = useRef<HTMLCanvasElement>(null);
   const profileCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,7 +49,12 @@ export default function PreviewPanel({
         return;
       }
 
-      const scale = canvas.width / bannerWidth;
+      const effectiveViewport = zoomViewport && zoomViewport.scale > 1 ? zoomViewport : viewportOffset;
+      const effectiveScale = zoomViewport && zoomViewport.scale > 1 
+        ? (canvas.width / bannerWidth) * zoomViewport.scale 
+        : canvas.width / bannerWidth;
+      const effectiveOffsetX = zoomViewport && zoomViewport.scale > 1 ? effectiveViewport.x : viewportOffset.x;
+      const effectiveOffsetY = zoomViewport && zoomViewport.scale > 1 ? effectiveViewport.y : viewportOffset.y;
 
       const drawLayers = async () => {
         for (const layer of layers) {
@@ -58,10 +65,10 @@ export default function PreviewPanel({
           await new Promise<void>((resolve) => {
             img.onload = () => {
               ctx.save();
-              const drawX = (layer.x - viewportOffset.x) * scale;
-              const drawY = (layer.y - viewportOffset.y) * scale;
-              const drawWidth = layer.width * scale;
-              const drawHeight = layer.height * scale;
+              const drawX = (layer.x - effectiveOffsetX) * effectiveScale;
+              const drawY = (layer.y - effectiveOffsetY) * effectiveScale;
+              const drawWidth = layer.width * effectiveScale;
+              const drawHeight = layer.height * effectiveScale;
 
               ctx.translate(drawX + drawWidth / 2, drawY + drawHeight / 2);
               ctx.rotate((layer.rotation * Math.PI) / 180);
@@ -80,7 +87,7 @@ export default function PreviewPanel({
 
     drawCanvas(bannerCanvasRef.current);
     drawCanvas(profileCanvasRef.current);
-  }, [layers, viewportOffset, bannerWidth, bannerHeight]);
+  }, [layers, viewportOffset, bannerWidth, bannerHeight, zoomViewport]);
 
   return (
     <div className="space-y-4 flex flex-col items-center">
