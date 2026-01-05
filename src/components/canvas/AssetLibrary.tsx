@@ -41,6 +41,8 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
           { name: "Cat 4", path: "/assets/overlay/Cat4.png" },
           { name: "Dog 1", path: "/assets/overlay/Dog1.png" },
           { name: "Dog 2", path: "/assets/overlay/Dog2.png" },
+          { name: "Dog 3", path: "/assets/overlay/Dog3.png" },
+          { name: "Dog 4", path: "/assets/overlay/Dog4.png" },
           { name: "Sea Lion 1", path: "/assets/overlay/Sea_Lion1.png" },
           { name: "Seal 1", path: "/assets/overlay/Seal1.png" },
         ];
