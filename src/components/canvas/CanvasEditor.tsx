@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import PreviewPanel from "./PreviewPanel";
 import Toolbar from "./Toolbar";
 import AssetLibrary from "./AssetLibrary";
-import { trackDownload } from "@/utils/analytics";
+// import { trackDownload } from "@/utils/analytics"; // Disabled for now - will re-enable with Supabase
 
 export interface Layer {
   id: string;
@@ -568,10 +568,11 @@ export default function CanvasEditor() {
     setExportDropdownOpen(false);
     
     // Track download analytics (with rate limiting)
-    trackDownload(format).catch(err => {
-      console.error('Analytics tracking failed:', err);
-      // Continue with download even if tracking fails
-    });
+    // Disabled for now - will re-enable with Supabase
+    // trackDownload(format).catch(err => {
+    //   console.error('Analytics tracking failed:', err);
+    //   // Continue with download even if tracking fails
+    // });
     
     const canvas = document.createElement("canvas");
     canvas.width = BANNER_WIDTH;
