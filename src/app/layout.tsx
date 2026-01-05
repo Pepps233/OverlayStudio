@@ -3,6 +3,7 @@ import { Manrope, Rancho } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ClientLayout from "@/components/ClientLayout";
+import { withBasePath } from "@/utils/basePath";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -19,6 +20,11 @@ const rancho = Rancho({
 export const metadata: Metadata = {
   title: "Overlay Studio - LinkedIn Banner Generator",
   description: "Create stunning LinkedIn banners with AI-powered blending. Upload images, add decorative elements, and export professional banners.",
+  icons: {
+    icon: withBasePath("/logo.svg"),
+    shortcut: withBasePath("/logo.svg"),
+    apple: withBasePath("/logo.svg"),
+  },
 };
 
 export default function RootLayout({
