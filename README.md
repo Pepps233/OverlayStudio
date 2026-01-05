@@ -56,7 +56,17 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
    pnpm install
    ```
 
-3. **Run the development server**
+3. **Set up environment variables (Optional - for analytics)**
+   
+   Create a `.env.local` file in the root directory:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+   
+   See [SUPABASE_SETUP.md](SUPABASE_SETUP.md) for detailed setup instructions.
+
+4. **Run the development server**
    ```bash
    npm run dev
    # or
@@ -65,7 +75,7 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
    pnpm dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
@@ -92,6 +102,8 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **Fonts**: Geist Sans, Geist Mono, Rancho (Google Fonts)
 - **Build Tool**: [Turbopack](https://turbo.build/)
+- **Backend**: [Supabase](https://supabase.com/) (optional - for analytics)
+- **Database**: PostgreSQL (via Supabase)
 
 ## Project Structure
 
