@@ -55,6 +55,12 @@ function checkClientRateLimit(): boolean {
 // Track download activity
 export async function trackDownload(format: 'png' | 'jpeg'): Promise<void> {
   try {
+    // Check if Supabase is configured
+    if (!supabase) {
+      console.log('Supabase not configured. Analytics disabled.');
+      return;
+    }
+    
     // Check client-side rate limit first
     if (!checkClientRateLimit()) {
       console.log('Download tracked locally but not sent to server (rate limited)');
@@ -97,6 +103,11 @@ export async function trackDownload(format: 'png' | 'jpeg'): Promise<void> {
 // Get download statistics (optional - for admin dashboard)
 export async function getDownloadStats() {
   try {
+    if (!supabase) {
+      console.log('Supabase not configured.');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('download_stats')
       .select('*')
