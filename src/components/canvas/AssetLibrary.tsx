@@ -37,7 +37,7 @@ export default function AssetLibrary({ onSelectAsset }: AssetLibraryProps) {
 
         const overlays = [
           { name: "Cat 1", path: withBasePath("/assets/overlay/Cat1.png") },
-          { name: "Cat 2", path: withBasePath("/assets/overlay/Cat2.png") },
+          { name: "Cat 2", path: withBasePath("/assets/overlay/Cat5.png") },
           { name: "Cat 3", path: withBasePath("/assets/overlay/Cat3.png") },
           { name: "Cat 4", path: withBasePath("/assets/overlay/Cat4.png") },
           { name: "Dog 1", path: withBasePath("/assets/overlay/Dog1.png") },
