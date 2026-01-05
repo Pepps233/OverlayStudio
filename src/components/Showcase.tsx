@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { withBasePath } from "@/utils/basePath";
 
 export default function Showcase() {
   return (
@@ -8,7 +9,7 @@ export default function Showcase() {
       {/* Cat Image */}
       <div className="relative w-48 h-48 md:w-64 md:h-64 mb-8 rounded-xl overflow-hidden">
         <Image
-          src="/cat_1.webp"
+          src={withBasePath("/cat_1.webp")}
           alt="Cute cat"
           fill
           className="object-contain rounded-xl"
@@ -26,7 +27,7 @@ export default function Showcase() {
       {/* Arrow Down SVG */}
       <div className="relative w-12 h-32 md:w-16 md:h-40 mb-12">
         <Image
-          src="/arrowdown.svg"
+          src={withBasePath("/arrowdown.svg")}
           alt="Arrow down"
           fill
           className="object-contain"
@@ -36,7 +37,7 @@ export default function Showcase() {
       {/* Showcase 1 */}
       <div className="relative w-full max-w-4xl mb-8">
         <Image
-          src="/showcase_1.webp"
+          src={withBasePath("/showcase_1.webp")}
           alt="Showcase example 1"
           width={1200}
           height={600}
@@ -47,7 +48,7 @@ export default function Showcase() {
       {/* Showcase 2 */}
       <div className="relative w-full max-w-4xl">
         <Image
-          src="/showcase_2.webp"
+          src={withBasePath("/showcase_2.webp")}
           alt="Showcase example 2"
           width={1200}
           height={600}

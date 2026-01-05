@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { withBasePath } from "@/utils/basePath";
 
 export default function Header() {
   return (
@@ -9,7 +10,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-11 h-11 flex items-center justify-center transition-all group-hover:scale-105">
-            <Image src="/logo.svg" alt="Overlay Studio Logo" width={44} height={44} className="text-violet-500 dark:text-violet-400" />
+            <Image src={withBasePath("/logo.svg")} alt="Overlay Studio Logo" width={44} height={44} className="text-violet-500 dark:text-violet-400" />
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold text-gray-900 dark:text-white leading-tight">

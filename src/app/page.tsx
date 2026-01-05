@@ -5,10 +5,13 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import Showcase from "@/components/Showcase";
 import CanvasEditor from "@/components/canvas/CanvasEditor";
+import BackgroundImage from "@/components/BackgroundImage";
+import { withBasePath } from "@/utils/basePath";
 
 export default function Home() {
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden">
+      <BackgroundImage />
       <Header />
       
       <HeroSection />
@@ -21,7 +24,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-12 h-12 flex items-center justify-center">
-              <Image src="/logo.svg" alt="Overlay Studio Logo" width={48} height={48} className="text-violet-500 dark:text-violet-400" />
+              <Image src={withBasePath("/logo.svg")} alt="Overlay Studio Logo" width={48} height={48} className="text-violet-500 dark:text-violet-400" />
             </div>
             <div className="text-left">
               <span className="text-xl font-bold text-gray-900 dark:text-white block">

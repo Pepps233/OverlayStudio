@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { withBasePath } from "@/utils/basePath";
 
 export default function HeroSection() {
   return (
@@ -9,7 +10,7 @@ export default function HeroSection() {
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="relative w-[100%] h-[100%]">
           <Image 
-            src="/hero_overlay.webp" 
+            src={withBasePath("/hero_overlay.webp")} 
             alt="Hero Overlay" 
             fill
             className="object-contain opacity-7"
@@ -30,7 +31,7 @@ export default function HeroSection() {
       <div className="absolute right-2 top-1/4 -translate-y-1/2 pointer-events-none z-0">
         <div className="relative w-[200px] h-[200px] sm:w-[200px] sm:h-[200px] md:w-[260px] md:h-[260px] lg:w-[350px] lg:h-[350px] opacity-80">
           <Image 
-            src="/cat_2.webp" 
+            src={withBasePath("/cat_2.webp")} 
             alt="Decorative Cat" 
             fill
             className="object-contain"

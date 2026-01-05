@@ -19,9 +19,6 @@ const rancho = Rancho({
 export const metadata: Metadata = {
   title: "Overlay Studio - LinkedIn Banner Generator",
   description: "Create stunning LinkedIn banners with AI-powered blending. Upload images, add decorative elements, and export professional banners.",
-  icons: {
-    icon: '/logo.svg',
-  },
 };
 
 export default function RootLayout({
