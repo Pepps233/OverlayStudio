@@ -4,15 +4,15 @@
  * In production, returns /OverlayStudio
  */
 export function getBasePath(): string {
-  // Check if we're in production and need the base path
-  if (typeof window !== 'undefined') {
-    // In browser, check if we're on GitHub Pages
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    return isGitHubPages ? '/OverlayStudio' : '';
-  }
-  
-  // Server-side or build time
-  return process.env.NODE_ENV === 'production' ? '/OverlayStudio' : '';
+    // Check if we're in production and need the base path
+    if (typeof window !== 'undefined') {
+        // In browser, check if we're on GitHub Pages
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        return isGitHubPages ? '/OverlayStudio' : '';
+    }
+
+    // Server-side or build time
+    return process.env.NODE_ENV === 'production' ? '/OverlayStudio' : '';
 }
 
 /**
@@ -21,15 +21,15 @@ export function getBasePath(): string {
  * @returns The full path with base path prepended
  */
 export function withBasePath(path: string): string {
-  const basePath = getBasePath();
-  
-  // If path already includes the base path, don't add it again
-  if (basePath && path.startsWith(basePath)) {
-    return path;
-  }
-  
-  // Ensure path starts with /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  
-  return `${basePath}${normalizedPath}`;
+    const basePath = getBasePath();
+
+    // If path already includes the base path, don't add it again
+    if (basePath && path.startsWith(basePath)) {
+        return path;
+    }
+
+    // Ensure path starts with /
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    return `${basePath}${normalizedPath}`;
 }
