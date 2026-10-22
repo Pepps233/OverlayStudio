@@ -7,7 +7,7 @@ export default function BackgroundImage() {
     useEffect(() => {
         // Set background image with proper base path
         const backgroundUrl = withBasePath("/website_background.webp");
-        document.body.style.backgroundImage = `url('${backgroundUrl}')`;
+        document.body.style.backgroundImage = `linear-gradient(var(--background-overlay), var(--background-overlay)), url('${backgroundUrl}')`;
 
         return () => {
             // Cleanup on unmount

@@ -1,6 +1,6 @@
 "use client";
 
-import React, {createContext, useContext, useState, useEffect, ReactNode} from "react";
+import React, {createContext, useContext, useSyncExternalStore, useEffect, ReactNode} from "react";
 
 type Theme = "light" | "dark";
 
@@ -11,32 +11,34 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function getStoredTheme(): Theme {
+    return localStorage.getItem("theme") === "dark" ? "dark" : "light";
+}
+
+function subscribeToTheme(onChange: () => void) {
+    window.addEventListener("storage", onChange);
+    window.addEventListener("themechange", onChange);
+    return () => {
+        window.removeEventListener("storage", onChange);
+        window.removeEventListener("themechange", onChange);
+    };
+}
+
+function getServerTheme(): Theme {
+    return "light";
+}
+
 export function ThemeProvider({children}: { children: ReactNode }) {
-    const [theme, setTheme] = useState<Theme>("light");
-    const [mounted, setMounted] = useState(false);
+    const theme = useSyncExternalStore(subscribeToTheme, getStoredTheme, getServerTheme);
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") as Theme | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-            document.documentElement.classList.remove("light", "dark");
-            document.documentElement.classList.add(savedTheme);
-        } else {
-            document.documentElement.classList.add("light");
-        }
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (mounted) {
-            localStorage.setItem("theme", theme);
-            document.documentElement.classList.remove("light", "dark");
-            document.documentElement.classList.add(theme);
-        }
-    }, [theme, mounted]);
+        document.documentElement.classList.remove("light", "dark");
+        document.documentElement.classList.add(theme);
+    }, [theme]);
 
     const toggleTheme = () => {
-        setTheme((prev) => (prev === "light" ? "dark" : "light"));
+        localStorage.setItem("theme", getStoredTheme() === "light" ? "dark" : "light");
+        window.dispatchEvent(new Event("themechange"));
     };
 
     return (

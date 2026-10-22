@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
     --background: #ffffff;
     --foreground: #171717;
+    --background-overlay: rgba(255, 255, 255, 0.9);
 }
 
 @theme inline {
@@ -15,11 +18,13 @@
 .light {
     --background: #ffffff;
     --foreground: #171717;
+    --background-overlay: rgba(255, 255, 255, 0.9);
 }
 
 .dark {
     --background: #030712;
     --foreground: #f9fafb;
+    --background-overlay: rgba(3, 7, 18, 0.3);
 }
 
 html, body {
@@ -28,12 +33,12 @@ html, body {
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
-    overscroll-behavior: none;
 }
 
 html {
     scroll-behavior: smooth;
-    overscroll-behavior-y: none;
+    /* Keep nested content free to pass scroll gestures to the document. */
+    overscroll-behavior: none;
 }
 
 body {

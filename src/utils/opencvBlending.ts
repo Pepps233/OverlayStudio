@@ -1,4 +1,13 @@
-declare const cv: any;
+interface OpenCVRuntime {
+    Mat?: unknown;
+    onRuntimeInitialized?: () => void;
+}
+
+declare global {
+    interface Window {
+        cv?: OpenCVRuntime;
+    }
+}
 
 let cvReady = false;
 
@@ -11,7 +20,7 @@ export async function loadOpenCV(): Promise<boolean> {
             return;
         }
 
-        if ((window as any).cv && (window as any).cv.Mat) {
+        if (window.cv?.Mat) {
             cvReady = true;
             resolve(true);
             return;
@@ -22,8 +31,8 @@ export async function loadOpenCV(): Promise<boolean> {
         script.async = true;
 
         script.onload = () => {
-            if ((window as any).cv) {
-                (window as any).cv.onRuntimeInitialized = () => {
+            if (window.cv) {
+                window.cv.onRuntimeInitialized = () => {
                     cvReady = true;
                     console.log('OpenCV.js loaded successfully');
                     resolve(true);
@@ -42,9 +51,7 @@ export async function loadOpenCV(): Promise<boolean> {
 
 export async function blendImagesWithSeamlessClone(
     layer1: { src: string; x: number; y: number; width: number; height: number; rotation: number },
-    layer2: { src: string; x: number; y: number; width: number; height: number; rotation: number },
-    canvasWidth: number,
-    canvasHeight: number
+    layer2: { src: string; x: number; y: number; width: number; height: number; rotation: number }
 ): Promise<{ dataUrl: string; bounds: { x: number; y: number; width: number; height: number } } | null> {
     try {
         const img1 = await loadImage(layer1.src);
@@ -89,21 +96,6 @@ export async function blendImagesWithSeamlessClone(
         console.error('Blending failed:', error);
         return null;
     }
-}
-
-function calculateOverlapRegion(
-    layer1: { x: number; y: number; width: number; height: number },
-    layer2: { x: number; y: number; width: number; height: number }
-): { x: number; y: number; width: number; height: number } | null {
-    const x1 = Math.max(layer1.x, layer2.x);
-    const y1 = Math.max(layer1.y, layer2.y);
-    const x2 = Math.min(layer1.x + layer1.width, layer2.x + layer2.width);
-    const y2 = Math.min(layer1.y + layer1.height, layer2.y + layer2.height);
-
-    if (x2 > x1 && y2 > y1) {
-        return {x: x1, y: y1, width: x2 - x1, height: y2 - y1};
-    }
-    return null;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

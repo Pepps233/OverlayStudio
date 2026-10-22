@@ -1,6 +1,7 @@
 "use client";
 
 import {useState, useRef, useCallback, useEffect} from "react";
+import NextImage from "next/image";
 import PreviewPanel from "./PreviewPanel";
 import Toolbar from "./Toolbar";
 import AssetLibrary from "./AssetLibrary";
@@ -33,12 +34,12 @@ export default function CanvasEditor() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [layers, setLayers] = useState<Layer[]>([]);
     const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
-    const [viewportOffset, setViewportOffset] = useState({
+    const [viewportOffset] = useState({
         x: (CANVAS_SIZE - BANNER_WIDTH) / 2,
         y: (CANVAS_SIZE - BANNER_HEIGHT) / 2
     });
     // Initial zoom state
-    const [zoom, setZoom] = useState(0.3);
+    const [, setZoom] = useState(0.3);
     const [isDragging, setIsDragging] = useState(false);
     const [isPanning, setIsPanning] = useState(false);
     const [panStart, setPanStart] = useState({x: 0, y: 0});
@@ -321,9 +322,7 @@ export default function CanvasEditor() {
                 if (layer1 && layer2) {
                     const blendResult = await blendImagesWithSeamlessClone(
                         layer1,
-                        layer2,
-                        BANNER_WIDTH,
-                        BANNER_HEIGHT
+                        layer2
                     );
 
                     if (blendResult) {
@@ -357,7 +356,7 @@ export default function CanvasEditor() {
         } finally {
             setIsBlending(false);
         }
-    }, [linkedPairs, layers, viewportOffset]);
+    }, [linkedPairs, layers]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         if (zoomMode && isDragging && draggedLayerType === 'decoration') {
@@ -500,7 +499,7 @@ export default function CanvasEditor() {
                 );
             });
         }
-    }, [isPanning, panStart, rotating, resizing, isDragging, selectedLayerId, viewportOffset, dragOffset, handleLayerResize, layers, getLinkedLayerId]);
+    }, [isPanning, panStart, rotating, resizing, isDragging, selectedLayerId, viewportOffset, dragOffset, handleLayerResize, layers, getLinkedLayerId, zoomMode, draggedLayerType]);
 
     const handleMouseUp = useCallback(() => {
         // Requirement 3: AUTO-FIT LOGIC
@@ -662,7 +661,7 @@ export default function CanvasEditor() {
                                 Assets
                             </h2>
                             <p className="mb-4 text-xs text-gray-600 dark:text-gray-400">
-                                Didn't find your favorite animal, city, or cosmetic item? Contribute your images to
+                                Didn&apos;t find your favorite animal, city, or cosmetic item? Contribute your images to
                                 the{" "}
                                 <a
                                     href="https://github.com/Pepps233/OverlayStudio"
@@ -816,9 +815,11 @@ export default function CanvasEditor() {
                                                 }}
                                                 onContextMenu={(e) => handleContextMenu(e, layer.id)}
                                             >
-                                                <img
+                                                <NextImage
                                                     src={layer.src}
                                                     alt={layer.name}
+                                                    fill
+                                                    unoptimized
                                                     className="w-full h-full pointer-events-none"
                                                     style={{objectFit: layer.aspectRatioLocked ? 'contain' : 'fill'}}
                                                     draggable={false}
@@ -937,9 +938,11 @@ export default function CanvasEditor() {
                                                 transform: `rotate(${layer.rotation}deg)`,
                                             }}
                                         >
-                                            <img
+                                            <NextImage
                                                 src={layer.src}
                                                 alt={layer.name}
+                                                fill
+                                                unoptimized
                                                 className="w-full h-full object-contain"
                                                 draggable={false}
                                             />
@@ -968,7 +971,7 @@ export default function CanvasEditor() {
                             </div>
                             {linkedPairs.length === 0 ? (
                                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
-                                    No linked images. Right-click images and select "Link" to connect them.
+                                    No linked images. Right-click images and select &quot;Link&quot; to connect them.
                                 </p>
                             ) : (
                                 <div className="space-y-2">
