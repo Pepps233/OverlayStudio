@@ -1,6 +1,7 @@
 "use client";
 
 import {useState, useEffect} from "react";
+import Image from "next/image";
 import {withBasePath} from "@/utils/basePath";
 
 interface AssetLibraryProps {
@@ -117,9 +118,10 @@ export default function AssetLibrary({onSelectAsset}: AssetLibraryProps) {
                                 onClick={() => onSelectAsset(asset.path, assetType)}
                                 className="group relative aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden hover:ring-2 hover:ring-violet-500 transition-all"
                             >
-                                <img
+                                <Image
                                     src={asset.path}
                                     alt={asset.name}
+                                    fill
                                     className="w-full h-full object-cover"
                                 />
                                 <div
