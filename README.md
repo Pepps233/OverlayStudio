@@ -6,9 +6,9 @@
   **Create stunning LinkedIn banners that show your personality**
   
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![Next.js](https://img.shields.io/badge/Next.js-16.1-black)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-19.2-blue)](https://reactjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+  [![Next.js](https://img.shields.io/badge/Next.js-16.4-black)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-19.3-blue)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)](https://www.typescriptlang.org/)
   
   [Live Demo](#) • [Report Bug](https://github.com/Pepps233/OverlayStudio/issues) • [Request Feature](https://github.com/Pepps233/OverlayStudio/issues)
 </div>
@@ -36,7 +36,7 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 22 or higher (Node.js 24 LTS recommended; used by deployment workflows)
 - npm, yarn, pnpm, or bun
 
 ### Installation
@@ -96,14 +96,20 @@ Overlay Studio is an open-source LinkedIn banner generator with a powerful drag-
 
 ## Tech Stack
 
-- **Framework**: [Next.js 16.1](https://nextjs.org/) with App Router
-- **UI Library**: [React 19.2](https://reactjs.org/)
-- **Language**: [TypeScript 5](https://www.typescriptlang.org/)
+- **Framework**: [Next.js 16.4](https://nextjs.org/) with App Router
+- **UI Library**: [React 19.3](https://reactjs.org/)
+- **Language**: [TypeScript 6](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **Fonts**: Geist Sans, Geist Mono, Rancho (Google Fonts)
 - **Build Tool**: [Turbopack](https://turbo.build/)
 - **Backend**: [Supabase](https://supabase.com/) (optional - for analytics)
 - **Database**: PostgreSQL (via Supabase)
+
+### Tooling Compatibility
+
+TypeScript stays on the latest 6.x release because `typescript-eslint` does not yet support TypeScript 7. ESLint stays on the latest 9.x release because the import, accessibility, and React plugins used by `eslint-config-next` do not yet declare support for ESLint 10. Revisit these major upgrades when the lint tooling supports them.
+
+To validate dependency updates, run `npm ci`, `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `npm audit`.
 
 ## Project Structure
 

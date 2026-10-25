@@ -59,7 +59,7 @@ Unsure where to begin? Look for issues labeled:
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 22 or higher (Node.js 24 LTS recommended; used by deployment workflows)
 - npm, yarn, pnpm, or bun
 - Git
 
@@ -348,7 +348,15 @@ npm run build
 
 # Run linter
 npm run lint
+
+# Check TypeScript types
+npx tsc --noEmit
+
+# Check dependencies for known vulnerabilities
+npm audit
 ```
+
+For dependency updates, start with `npm ci` to verify the committed lockfile. Keep TypeScript on 6.x and ESLint on 9.x until the lint tooling supports their newer major versions; see [Tooling Compatibility](README.md#tooling-compatibility).
 
 ### Common Issues
 
