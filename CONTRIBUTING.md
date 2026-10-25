@@ -1,396 +1,96 @@
 # Contributing to Overlay Studio
 
-First off, thank you for considering contributing to Overlay Studio! It's people like you that make Overlay Studio such a great tool.
+Contributions can improve the editor, fix bugs, add artwork, or make the documentation clearer. Keep each change focused so reviewers can understand its purpose and check the result.
 
-## Table of Contents
+Everyone participating in this repository is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-- [Code of Conduct](#code-of-conduct)
-- [How Can I Contribute?](#how-can-i-contribute)
-- [Development Setup](#development-setup)
-- [Project Structure](#project-structure)
-- [Coding Guidelines](#coding-guidelines)
-- [Commit Guidelines](#commit-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Adding New Assets](#adding-new-assets)
-- [Reporting Bugs](#reporting-bugs)
-- [Suggesting Enhancements](#suggesting-enhancements)
+## Local Setup
 
-## Code of Conduct
-
-This project and everyone participating in it is governed by our commitment to fostering an open and welcoming environment. By participating, you are expected to uphold this code:
-
-- Be respectful and inclusive
-- Welcome newcomers and help them get started
-- Accept constructive criticism gracefully
-- Focus on what is best for the community
-- Show empathy towards other community members
-
-## How Can I Contribute?
-
-### Reporting Bugs
-
-Before creating bug reports, please check the existing issues to avoid duplicates. When you create a bug report, include as many details as possible:
-
-- **Use a clear and descriptive title**
-- **Describe the exact steps to reproduce the problem**
-- **Provide specific examples** (screenshots, code snippets)
-- **Describe the behavior you observed** and what you expected
-- **Include your environment details** (OS, browser, Node.js version)
-
-### Suggesting Enhancements
-
-Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion:
-
-- **Use a clear and descriptive title**
-- **Provide a detailed description** of the suggested enhancement
-- **Explain why this enhancement would be useful**
-- **List any similar features** in other applications if applicable
-
-### Your First Code Contribution
-
-Unsure where to begin? Look for issues labeled:
-
-- `good first issue` - Simple issues perfect for newcomers
-- `help wanted` - Issues where we need community help
-- `bug` - Bug fixes are always appreciated
-- `enhancement` - Feature improvements
-
-## Development Setup
-
-### Prerequisites
-
-- Node.js 22 or higher (Node.js 24 LTS recommended; used by deployment workflows)
-- npm, yarn, pnpm, or bun
-- Git
-
-### Setting Up Your Development Environment
-
-1. **Fork the repository** on GitHub
-
-2. **Clone your fork locally**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/OverlayStudio.git
-   cd OverlayStudio
-   ```
-
-3. **Add the upstream repository**
-   ```bash
-   git remote add upstream https://github.com/Pepps233/OverlayStudio.git
-   ```
-
-4. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-5. **Create a branch for your changes**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-6. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-7. **Open your browser** at [http://localhost:3000](http://localhost:3000)
-
-### Keeping Your Fork Updated
+Use Node.js 22 or newer (Node.js 24 LTS is recommended), npm, and Git. If you do not have write access, fork the repository and clone your fork instead.
 
 ```bash
-git fetch upstream
-git checkout main
-git merge upstream/main
-```
-
-## Project Structure
-
-```
-OverlayStudio/
-├── public/
-│   ├── assets/          # Static assets (backgrounds, overlays, cosmetics)
-│   └── *.svg/webp       # Public images and icons
-├── src/
-│   ├── app/             # Next.js App Router pages
-│   │   ├── layout.tsx   # Root layout
-│   │   ├── page.tsx     # Home page
-│   │   └── globals.css  # Global styles
-│   └── components/      # React components
-│       ├── canvas/      # Canvas editor components
-│       └── *.tsx        # UI components
-├── .gitignore
-├── package.json
-├── tsconfig.json
-└── tailwind.config.ts
-```
-
-### Key Files
-
-- **`src/components/canvas/CanvasEditor.tsx`** - Main canvas editor logic
-- **`src/components/canvas/AssetLibrary.tsx`** - Asset selection and management
-- **`src/components/canvas/PreviewPanel.tsx`** - Banner preview functionality
-- **`src/components/canvas/Toolbar.tsx`** - Upload and toolbar controls
-- **`src/app/page.tsx`** - Main landing page
-
-## Coding Guidelines
-
-### TypeScript
-
-- Use TypeScript for all new files
-- Define proper interfaces and types
-- Avoid using `any` type unless absolutely necessary
-- Use meaningful variable and function names
-
-### React
-
-- Use functional components with hooks
-- Keep components small and focused
-- Use `"use client"` directive for client components
-- Implement proper error boundaries where needed
-
-### Styling
-
-- Use Tailwind CSS utility classes
-- Follow the existing color scheme (violet/purple theme)
-- Ensure responsive design (mobile-first approach)
-- Support both light and dark modes
-
-### Code Style
-
-```typescript
-interface ButtonProps {
-  onClick: () => void;
-  label: string;
-  disabled?: boolean;
-}
-
-export default function Button({ onClick, label, disabled = false }: ButtonProps) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="px-4 py-2 bg-violet-600 text-white rounded-lg"
-    >
-      {label}
-    </button>
-  );
-}
-```
-
-### Performance
-
-- Optimize images (use WebP format when possible)
-- Use `useCallback` and `useMemo` for expensive operations
-- Implement proper loading states
-- Avoid unnecessary re-renders
-
-## Commit Guidelines
-
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-### Commit Message Format
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-### Types
-
-- **feat**: A new feature
-- **fix**: A bug fix
-- **docs**: Documentation changes
-- **style**: Code style changes (formatting, missing semicolons, etc.)
-- **refactor**: Code refactoring without changing functionality
-- **perf**: Performance improvements
-- **test**: Adding or updating tests
-- **chore**: Maintenance tasks, dependency updates
-
-### Examples
-
-```bash
-feat(canvas): add rotation control for layers
-fix(export): resolve PNG transparency issue
-docs(readme): update installation instructions
-style(toolbar): improve button spacing
-refactor(asset-library): simplify asset loading logic
-```
-
-## Pull Request Process
-
-1. **Ensure your code follows the coding guidelines**
-2. **Update documentation** if you're changing functionality
-3. **Add tests** if applicable
-4. **Update the README.md** if needed
-5. **Ensure the build passes** (`npm run build`)
-6. **Write a clear PR description** explaining:
-   - What changes you made
-   - Why you made them
-   - How to test them
-   - Any breaking changes
-
-### PR Title Format
-
-Use the same format as commit messages:
-
-```
-feat: add layer rotation feature
-fix: resolve canvas zoom issue on mobile
-docs: improve contributing guidelines
-```
-
-### PR Checklist
-
-- [ ] My code follows the project's coding guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code where necessary
-- [ ] I have updated the documentation accordingly
-- [ ] My changes generate no new warnings
-- [ ] I have tested my changes thoroughly
-- [ ] Any dependent changes have been merged
-
-## Adding New Assets
-
-### Background Images
-
-1. Place images in `public/assets/background/`
-2. Recommended size: **1584 × 396 px**
-3. Use optimized formats (WebP, JPEG)
-4. Update `AssetLibrary.tsx` to include the new asset
-
-```typescript
-const backgrounds = [
-  // ... existing backgrounds
-  { name: "Your City", path: "/assets/background/your-city.jpg" },
-];
-```
-
-### Overlay Images
-
-1. Place images in `public/assets/overlay/`
-2. Use **PNG format with transparency**
-3. Optimize file size
-4. Update `AssetLibrary.tsx`
-
-### Cosmetic Items
-
-1. Place images in `public/assets/cosmetic/`
-2. Use **PNG format with transparency**
-3. Keep consistent sizing
-4. Update `AssetLibrary.tsx`
-
-## Reporting Bugs
-
-### Before Submitting
-
-- Check the [existing issues](https://github.com/Pepps233/OverlayStudio/issues)
-- Try the latest version
-- Collect relevant information
-
-### Bug Report Template
-
-```markdown
-**Describe the bug**
-A clear description of what the bug is.
-
-**To Reproduce**
-Steps to reproduce:
-1. Go to '...'
-2. Click on '...'
-3. See error
-
-**Expected behavior**
-What you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots.
-
-**Environment:**
- - OS: [e.g., macOS, Windows, Linux]
- - Browser: [e.g., Chrome, Safari, Firefox]
- - Version: [e.g., 22]
-
-**Additional context**
-Any other relevant information.
-```
-
-## Suggesting Enhancements
-
-### Enhancement Template
-
-```markdown
-**Is your feature request related to a problem?**
-A clear description of the problem.
-
-**Describe the solution you'd like**
-What you want to happen.
-
-**Describe alternatives you've considered**
-Other solutions you've thought about.
-
-**Additional context**
-Screenshots, mockups, or examples.
-```
-
-## Development Tips
-
-### Testing Your Changes
-
-```bash
-# Run development server
+git clone https://github.com/Pepps233/OverlayStudio.git
+cd OverlayStudio
+npm ci
 npm run dev
+```
 
-# Build for production
-npm run build
+Open [http://localhost:3000](http://localhost:3000). Stop the server with `Ctrl+C` when finished.
 
-# Run linter
+## Before Making Changes
+
+Check [existing issues](https://github.com/Pepps233/OverlayStudio/issues) and [pull requests](https://github.com/Pepps233/OverlayStudio/pulls) for related work. For a substantial editor change or a new dependency, explain the problem and proposed approach in an issue before investing in an implementation.
+
+This is a Next.js application, not a multi-package workspace. Useful starting points are:
+
+- `src/app/` for pages, layout, and global styles.
+- `src/components/canvas/CanvasEditor.tsx` for canvas interaction and layer state.
+- `src/components/canvas/AssetLibrary.tsx` for the built-in image collection.
+- `src/components/canvas/PreviewPanel.tsx` and `Toolbar.tsx` for preview and toolbar controls.
+- `public/assets/` for backgrounds, overlays, and cosmetics.
+
+AI-assisted contributions are welcome, but you must understand and review everything you submit. You remain responsible for its behavior, security, licensing, and validation.
+
+## Pull Request Flow
+
+1. Create a focused branch, such as `feat/banner-export`, `chore/update-packages`, or `docs/editor-guide`.
+2. For a bug fix, reproduce the problem in the editor before changing the code. Record the steps so reviewers can repeat them.
+3. Implement the change and update relevant documentation. Include regression tests when suitable; describe manual coverage when no automated test covers the behavior.
+4. Run the checks below and review your diff for unrelated edits, sensitive data, and generated files.
+5. Use the [pull request template](.github/pull_request_template.md), completing **Summary**, **Reasoning**, **Changes**, and **Testing**. Include screenshots or a short recording for visual changes, and identify any compatibility risks or new dependencies.
+6. Assign yourself and add appropriate labels before requesting review. If repository permissions prevent this, ask a maintainer to help.
+7. Respond to feedback with focused changes. Wait for maintainer approval and any required checks before merging.
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages and PR titles:
+
+```text
+feat(canvas): add rotation controls
+fix(export): preserve transparent backgrounds
+chore(deps): update editor dependencies
+docs(readme): clarify local setup
+```
+
+## Validation
+
+Run these checks before requesting review for code changes:
+
+```bash
 npm run lint
-
-# Check TypeScript types
 npx tsc --noEmit
-
-# Check dependencies for known vulnerabilities
-npm audit
+npm run build
 ```
 
-For dependency updates, start with `npm ci` to verify the committed lockfile. Keep TypeScript on 6.x and ESLint on 9.x until the lint tooling supports their newer major versions; see [Tooling Compatibility](README.md#tooling-compatibility).
+The production build generates the static site used by GitHub Pages. The repository currently has no automated test script; do not claim an automated test suite passed. For documentation-only changes, check links, commands, and `git diff --check`.
 
-### Common Issues
+For editor changes, exercise the affected workflow in the browser. As relevant, check image uploads, asset selection, dragging, resizing, rotation, layer ordering, zoom, and PNG/JPEG downloads. Open downloaded images to confirm the result, including transparency where applicable. Check changed controls at narrow and wide screen widths and with keyboard navigation. List what you actually tested, along with any remaining gaps.
 
-**Port already in use:**
-```bash
-# Kill the process using port 3000
-lsof -ti:3000 | xargs kill -9
-```
+Fix diagnostics introduced by your change. If an existing warning or environment limitation prevents a check from passing, document it rather than hiding it or disabling a rule without explanation.
 
-**Dependencies out of sync:**
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
+For dependency updates, also run `npm ci` and `npm audit`, and include the lockfile changes. TypeScript currently stays on 6.x because the lint tooling does not support TypeScript 7; ESLint stays on 9.x because several Next.js lint plugins do not declare ESLint 10 compatibility. Recheck upstream support before upgrading those major versions.
 
-## 🌟 Recognition
+## Code and Asset Guidelines
 
-Contributors will be recognized in:
-- GitHub contributors page
-- Project documentation
-- Release notes (for significant contributions)
+- Follow nearby TypeScript and React conventions. Prefer explicit types to `any`, keep components focused, and use client components only where browser APIs or interactive state require them.
+- Preserve the existing visual style and give interactive controls meaningful labels, visible focus states, and usable hit targets.
+- Use `withBasePath` from `src/utils/basePath.ts` for public asset URLs so they work under the GitHub Pages project path as well as locally.
+- Avoid unnecessary dependencies and large image files. Keep secrets, `.env.local`, build output, and local editor state out of commits.
+- Add backgrounds to `public/assets/background/`, transparent overlays to `public/assets/overlay/`, and accessories to `public/assets/cosmetic/`. Register built-in assets in `AssetLibrary.tsx` and check their preview and export behavior.
+- For backgrounds, 1584 × 396 pixels is the intended banner size. Preserve transparency for assets that need it and optimize images without visibly degrading them.
+- Only submit artwork you have permission to redistribute. State its source and license in the PR and include any required attribution. Do not include personal or confidential images in examples or screenshots.
 
-## Getting Help
+## Issues and Feature Requests
 
-- **GitHub Issues**: For bugs and feature requests
-- **Discussions**: For questions and general discussion
-- **Pull Requests**: For code review and collaboration
+Use [GitHub Issues](https://github.com/Pepps233/OverlayStudio/issues) for reproducible bugs and proposals. Include:
 
-## License
+- What you expected and what happened instead.
+- The smallest sequence of steps that demonstrates the issue, or the banner-creation task a proposed feature would help with.
+- Browser and operating system details, and Node.js version for local setup problems.
+- Relevant screenshots, logs, or sample images with private information removed.
 
-By contributing to Overlay Studio, you agree that your contributions will be licensed under the MIT License.
+For feature requests, describe the user benefit and alternatives rather than only prescribing an implementation. Never post credentials or private conduct reports in public issues; see the [Code of Conduct](CODE_OF_CONDUCT.md) for reporting guidance.
 
----
+## Review and Licensing
 
-Thank you for contributing to Overlay Studio! 🎉
+Review focuses on the banner-creation experience, correctness, accessibility, security, asset rights, and maintainability. Small, self-contained PRs are easier to validate than unrelated changes bundled together.
 
-Your efforts help make this project better for everyone. We appreciate your time and expertise!
+By submitting a contribution, you agree that it can be distributed under the project's [MIT License](LICENSE). Identify any third-party assets and their separate license terms explicitly.
