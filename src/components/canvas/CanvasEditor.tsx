@@ -71,12 +71,13 @@ export default function CanvasEditor() {
     const [zoomViewport, setZoomViewport] = useState({x: 0, y: 0, scale: 1});
     const [draggedLayerType, setDraggedLayerType] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!zoomMode) {
+    const handleZoomModeToggle = () => {
+        if (zoomMode) {
             setZoomViewport({x: 0, y: 0, scale: 1});
             setDraggedLayerType(null);
         }
-    }, [zoomMode]);
+        setZoomMode(!zoomMode);
+    };
 
     // Responsive container width observer
     useEffect(() => {
@@ -684,7 +685,7 @@ export default function CanvasEditor() {
                             onUpload={handleFileUpload}
                             onExport={exportBanner}
                             zoomMode={zoomMode}
-                            onZoomModeToggle={() => setZoomMode(prev => !prev)}
+                            onZoomModeToggle={handleZoomModeToggle}
                         />
 
                         {/* Download Button */}
